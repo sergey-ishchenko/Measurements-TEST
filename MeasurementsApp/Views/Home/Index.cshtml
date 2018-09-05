@@ -1,0 +1,112 @@
+﻿@using MeasurementsLibrary.Models
+@model List<Readings>
+@{
+    ViewBag.Title = "Readings";
+}
+
+
+
+@using (Html.BeginForm("Index", "Home", FormMethod.Get, new { @class = "form-inline", role = "form" }))
+{
+    <div class="form-group">
+        <label class="mr-2" for="deviceId">Device</label>
+        @Html.DropDownList("deviceId", (SelectList)ViewBag.Devices, new { @class = "form-control mr-3" })
+    </div>
+
+    <div class="form-group mr-3">
+        <div class="input-group ">
+            <div class="input-group-prepend">
+                <div class="input-group-text">from</div>
+            </div>
+            <input class="datepicker form-control" id="dateFromStr" name="dateFromStr" type="text" value="@ViewBag.DateFrom.ToString("dd.MM.yyyy")">
+        </div>
+    </div>
+
+    <div class="form-group mr-3">
+        <div class="input-group">
+            <div class="input-group-prepend">
+                <div class="input-group-text">to</div>
+            </div>
+            <input class="datepicker form-control" id="dateToStr" name="dateToStr" type="text" value="@ViewBag.DateTo.ToString("dd.MM.yyyy")">
+        </div>
+    </div>
+
+    <div class="form-group">
+        <input type="submit" class="btn btn-primary " value="Apply" />
+    </div>
+}
+
+
+
+<div class="mt-5">
+    <canvas id="canvas"></canvas>
+</div>
+
+
+<script>
+    $(function () {
+        $('.datepicker').datepicker({
+            language: 'ru',
+            format: 'dd.mm.yyyy',
+            autoclose: true
+        });
+    });
+
+
+
+    var dates = @Html.Raw(Json.Encode(@Model.Select(i => i.MeasurementDateTime.ToString()).ToArray()));
+    var values = @Html.Raw(Json.Encode(@Model.Select(i => i.Value).ToArray()));
+
+    
+    var config = {
+        type: 'line',
+        data: {
+            labels: dates,
+            datasets: [{
+                label: 'dataset',
+                backgroundColor: window.chartColors.red,
+                borderColor: window.chartColors.red,
+                data: values,
+                fill: false,            
+            }]
+        },
+        options: {
+            responsive: true,
+            title: {
+                display: true,
+                text: 'Chart'
+            },
+            tooltips: {
+                mode: 'index',
+                intersect: false,
+            },
+            hover: {
+                mode: 'nearest',
+                intersect: true
+            },
+            scales: {
+                xAxes: [{
+                    display: true,
+                    scaleLabel: {
+                        display: true,
+                        labelString: 'Date'
+                    }
+                }],
+                yAxes: [{
+                    display: true,
+                    scaleLabel: {
+                        display: true,
+                        labelString: 'Value'
+                    }
+                }]
+            }
+        }
+    };
+
+    window.onload = function () {
+        var ctx = document.getElementById('canvas').getContext('2d');
+        window.myLine = new Chart(ctx, config);
+    };
+
+    
+</script>
